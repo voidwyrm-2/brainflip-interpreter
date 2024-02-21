@@ -34,6 +34,7 @@ def processcode(line: str | list[str] | tuple[str] | dict[any, str]):
     if type(line) == dict: line = list(line.values())
     if type(line) in (list, tuple): line = stringify(line)
     line = truncatecode(line)
+    if debug: print('truncated code:\n' + line)
     line = line.replace('\n', '').replace(' ', '').strip()
     global value
     if line.count('[') != line.count(']'): print('Error: expected "[" to close "]"'); raise SystemExit()
