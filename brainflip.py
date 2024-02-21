@@ -25,9 +25,18 @@ for i in range(startingbytes): databytes.append(0)
 
 datapointer = 0
 
+def stringify(list):
+    out = ''
+    for l in list: out += list
+    return out
 
-
-def processcodeline(line: str | list[str]):
+def processcode(line: str | list[str] | tuple[str] | dict[any, str]):
+    if type(line) == dict: line = list(line.values())
+    if type(line) in (list, tuple): line = stringify(line)
+    line = truncatecode(line)
+    line = line.replace('\n', '').replace(' ', '').strip()
+    global value
+    if line.count('[') != line.count(']'): print('Error: expected "[" to close "]"'); raise SystemExit()
     global datapointer
     if type(line) == str: line = list(line)
     line.insert(0, ' ')
@@ -75,14 +84,6 @@ def processcodeline(line: str | list[str]):
         else: c += 1
         #cutoff += 1
         #if cutoff >= 1000: raise SystemExit()
-
-def processcode(lines: str | list[str]):
-    lines = lines.strip()
-    global value
-    if lines.count('[') != lines.count(']'): print('Error: expected "[" to close "]"'); raise SystemExit()
-    if type(lines) != list: lines = lines.split('\n')
-    for l in range(len(lines)): processcodeline(lines[l])
-
 
 
 def truncatecode(inp: str):
