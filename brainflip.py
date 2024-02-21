@@ -46,10 +46,12 @@ def processcodeline(line: str | list[str]):
     #cutoff = 0
     c = 0
     while c != len(line):
+        if datapointer > len(databytes) - 1: datapointer = 0
+        if datapointer < -(len(databytes) - 1): datapointer = len(databytes) - 1
         char = line[c]
-        if debug:
-            print('char:', char + '; cn:', c + 1)
-            #print('dp, b:', str(datapointer) + ',', str(databytes[datapointer]))
+        #if debug:
+        #print('char:', char + '; cn:', c + 1)
+        print('dp, b:', str(datapointer) + ',', str(databytes[datapointer]))
         if char == '+': databytes[datapointer] += 1; c += 1
         elif char == '-': databytes[datapointer] -= 1; c += 1
         elif char == '>': datapointer += 1; c += 1
@@ -67,14 +69,12 @@ def processcodeline(line: str | list[str]):
             waiting = True
             while waiting:
                 useinp = input('waiting for user input...\n')
-                if useinp.isdigit(): databytes[datapointer] == int(useinp); waiting = False; break
+                if useinp.isdigit(): databytes[datapointer] = int(useinp); waiting = False; break
                 else: print('that\'s not a digit!')
-            c += 1
+            if not waiting: c += 1
         else: c += 1
         #cutoff += 1
         #if cutoff >= 1000: raise SystemExit()
-
-
 
 def processcode(lines: str | list[str]):
     lines = lines.strip()
@@ -83,20 +83,40 @@ def processcode(lines: str | list[str]):
     if type(lines) != list: lines = lines.split('\n')
     for l in range(len(lines)): processcodeline(lines[l])
 
+
+
+def truncatecode(inp: str):
+    inp = inp.replace('\n', '').replace(' ', '')
+    out = ''
+    for char in inp:
+        if char in '+-><[].,': out += char
+    return out
+
+
+
 helloworld = '++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.'
 
+
+
+commandcache = ''
+uselast = False
+truncate = False
 def shell():
+    global truncate
+    global uselast
+    global commandcache
     running = True
     while running:
-        inp = input('>>> ')
+        if uselast and commandcache not in (' ', '', None): inp = commandcache
+        else: inp = input('>>> ')
+        if inp != (' ', '', None): commandcache = inp
+        if inp.endswith((' --trunc', ' --truncate')): truncate = True; inp = inp.removesuffix(' --trunc').removesuffix(' --truncate')
+        #print('trunc:', truncate)
         if inp == 'exit': raise SystemExit()
-        elif inp.startswith('run '): processcode(inp.removeprefix('run '))
+        elif inp.startswith('run '):
+            if truncate: print(truncatecode(inp.removeprefix('run ')))
+            else: processcode(inp.removeprefix('run '))
         elif inp in ('hw', 'helloworld', 'hello world'): processcode(helloworld)
-        elif inp in ('hwi', 'helloworldindex', 'hello world index'):
-            hw = list(helloworld)
-            for cha in range(len(hw)):
-                ch = hw[cha]
-                print(f'{cha + 1}: {ch}')
         elif inp.startswith('file '):
             path = inp.removeprefix('file ')
             path = path.strip('.b').strip('.bf')
@@ -106,8 +126,18 @@ def shell():
                 else: print(f'file "{path}" does not exist'); raise SystemExit()
             fin = ''
             with open(path, 'rt') as file: fin = file.read()
-            processcode(fin)
+            if truncate: print(truncatecode(fin))
+            else: processcode(fin)
+        #elif inp == 'last': uselast = True; truncate = False; continue
+        elif inp.startswith('search '):
+            term = inp.removeprefix('search ')
+            for key in ASCIIDICT.keys():
+                if ASCIIDICT[key] == term: print(f'{key}: "{ASCIIDICT[key]}"')
+        elif inp == 'listascii':
+            for key in ASCIIDICT.keys(): print(f'{key}: "{ASCIIDICT[key]}"')
         else: print(f'unknown command "{inp.split(" ")[0]}"')
+    uselast = False
+    truncate = False
 
 
 
