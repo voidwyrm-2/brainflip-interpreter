@@ -50,8 +50,8 @@ def processcodeline(line: str | list[str]):
         if datapointer < -(len(databytes) - 1): datapointer = len(databytes) - 1
         char = line[c]
         #if debug:
-        #print('char:', char + '; cn:', c + 1)
-        print('dp, b:', str(datapointer) + ',', str(databytes[datapointer]))
+        #   print('char:', char + '; cn:', c + 1)
+        #   print('dp, b:', str(datapointer) + ',', str(databytes[datapointer]))
         if char == '+': databytes[datapointer] += 1; c += 1
         elif char == '-': databytes[datapointer] -= 1; c += 1
         elif char == '>': datapointer += 1; c += 1
