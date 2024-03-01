@@ -27,7 +27,7 @@ datapointer = 0
 
 def stringify(list):
     out = ''
-    for l in list: out += list
+    for l in list: out += l
     return out
 
 def processcode(line: str | list[str] | tuple[str] | dict[any, str]):
